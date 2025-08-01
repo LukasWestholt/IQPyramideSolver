@@ -2,10 +2,11 @@ import unittest
 
 from pyramide.Color import Color
 from pyramide.Form import Form
-from pyramide.Game import Game
+from pyramide.Game import Game, NotValidProblemException
 from pyramide.GameBoard import GameBoard
 from pyramide.GamePosition import GamePosition
 from pyramide.Piece import Piece
+from pyramide.SolvedGame import SolvedGame
 
 
 class TestGameValidity(unittest.TestCase):
@@ -20,8 +21,7 @@ class TestGameValidity(unittest.TestCase):
         ]
 
     def test_game_is_valid1(self):
-        game = Game(self.pieces, self.board, {})
-        self.assertTrue(game.is_valid_problem())
+        game = Game(self.pieces, self.board, {}) # no exceptions
 
     def test_game_is_valid2(self):
         board = GameBoard({
@@ -29,8 +29,7 @@ class TestGameValidity(unittest.TestCase):
             for x in range(3)
             for y in range(3)
         } | {GamePosition(4, 0), GamePosition(4, 1), GamePosition(4, 2)})
-        game = Game(self.pieces, board, {})
-        self.assertTrue(game.is_valid_problem())
+        game = Game(self.pieces, board, {}) # no exceptions
 
     def test_game_is_valid3(self):
         board = GameBoard({
@@ -38,8 +37,8 @@ class TestGameValidity(unittest.TestCase):
             for x in range(3)
             for y in range(3)
         } | {GamePosition(4, 0), GamePosition(4, 1)})
-        game = Game(self.pieces, board, {})
-        self.assertFalse(game.is_valid_problem())
+        with self.assertRaises(NotValidProblemException):
+            game = Game(self.pieces, board, {})
 
 
 class TestGame(unittest.TestCase):
@@ -83,8 +82,7 @@ class TestGame(unittest.TestCase):
         self.assertIn(self.piece2, new_state)
 
     def test_is_valid_problem_true(self):
-        game = Game(self.pieces, self.board, {})
-        self.assertTrue(game.is_valid_problem())
+        Game(self.pieces, self.board, {}) # no exceptions
 
     def test_sort_pieces_by_size(self):
         game = Game(self.pieces, self.board, {})
@@ -93,9 +91,9 @@ class TestGame(unittest.TestCase):
 
     def test_get_valid_gameboards_returns_solution(self):
         game = Game(self.pieces, self.board, {})
-        result = game.get_valid_gameboards(parallel=False)
+        result = game.solve(parallel=False)
         for r in result:
-            self.assertIsInstance(r, frozenset)
+            self.assertIsInstance(r, SolvedGame)
 
 
 if __name__ == "__main__":

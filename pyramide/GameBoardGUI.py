@@ -2,8 +2,7 @@ import math
 import tkinter as tk
 
 from pyramide.GameBoard import GameBoard
-from pyramide.GamePosition import GamePosition
-from pyramide.Piece import Piece
+from pyramide.SolvedGame import SolvedGame
 
 
 class GameBoardGUI(tk.Tk):
@@ -45,8 +44,8 @@ class GameBoardGUI(tk.Tk):
 
         self.canvas.create_line(new_points, smooth=True, **kwargs)
 
-    def draw_figure(self, figure: frozenset[tuple[Piece, frozenset[GamePosition]]]):
-        for piece, positions in figure:
+    def draw_figure(self, figure: SolvedGame):
+        for piece, positions in figure.gameboard:
             for pos in positions:
                 x1 = pos.x * self.cell_size
                 y1 = pos.y * self.cell_size
