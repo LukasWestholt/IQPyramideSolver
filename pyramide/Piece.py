@@ -52,6 +52,9 @@ class Piece:
         for angle in [0, 90, 180, 270]:
             for new_board, placed_piece_position in self.rotate_piece(angle).delete_from_board(board):
                 yield new_board, placed_piece_position
+        for mirror in ["x", "y"]:
+            for new_board, placed_piece_position in self.mirror_piece(mirror).rotate_piece(angle).delete_from_board(board):
+                yield new_board, placed_piece_position
 
     def fits_on_board(self, board: GameBoard) -> bool:
         try:
