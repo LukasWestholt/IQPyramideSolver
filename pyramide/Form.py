@@ -12,23 +12,10 @@ class Form(GameBoard):
 
     def delete_from_board(self, board: GameBoard) -> Iterator[tuple[GameBoard, frozenset[GamePosition]]]:
         for anchor in board.position_set:
-            # Berechne die relative Verschiebung
-            dx = anchor.x - min(pos.x for pos in self.position_set)
-            dy = anchor.y - min(pos.y for pos in self.position_set)
-
-            # Verschiebe alle Positionen des Pieces
-            translated_positions = {
-                GamePosition(pos.x + dx, pos.y + dy)
-                for pos in self.position_set
-            }
-
-            # Prüfe, ob alle verschobenen Positionen auf dem Spielbrett liegen
-            if translated_positions.issubset(board.position_set):
-                yield GameBoard(board.position_set.difference(translated_positions)), frozenset(translated_positions)
-            else:
+            for method in (min, max):
                 # Berechne die relative Verschiebung
-                dx = anchor.x - max(pos.x for pos in self.position_set)
-                dy = anchor.y - max(pos.y for pos in self.position_set)
+                dx = anchor.x - method(pos.x for pos in self.position_set)
+                dy = anchor.y - method(pos.y for pos in self.position_set)
 
                 # Verschiebe alle Positionen des Pieces
                 translated_positions = {
@@ -39,6 +26,7 @@ class Form(GameBoard):
                 # Prüfe, ob alle verschobenen Positionen auf dem Spielbrett liegen
                 if translated_positions.issubset(board.position_set):
                     yield GameBoard(board.position_set.difference(translated_positions)), frozenset(translated_positions)
+                    break
 
     def fits_on_board(self, board: GameBoard) -> bool:
         try:
