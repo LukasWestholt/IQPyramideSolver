@@ -6,11 +6,9 @@ from pyramide.GamePosition import GamePosition
 
 class Form(GameBoard):
     def __init__(self, position_set: set[GamePosition] | frozenset[GamePosition]):
-        super().__init__(position_set)
+        normalized_position_set = GameBoard(position_set).normalize_to_gameboard().position_set
+        super().__init__(normalized_position_set)
         self.assert_all_positions_connected()
-
-    def normalize_to_form(self) -> "Form":
-        return Form(self.normalize_to_gameboard().position_set)
 
     def delete_from_board(self, board: GameBoard) -> Iterator[tuple[GameBoard, frozenset[GamePosition]]]:
         for anchor in board.position_set:

@@ -32,19 +32,19 @@ class Piece:
         if angle == 0:
             return self.form
         elif angle == 90:
-            return Form({GamePosition(-p.y, p.x) for p in self.form.position_set}).normalize_to_form()
+            return Form({GamePosition(-p.y, p.x) for p in self.form.position_set})
         elif angle == 180:
-            return Form({GamePosition(-p.x, -p.y) for p in self.form.position_set}).normalize_to_form()
+            return Form({GamePosition(-p.x, -p.y) for p in self.form.position_set})
         elif angle == 270:
-            return Form({GamePosition(p.y, -p.x) for p in self.form.position_set}).normalize_to_form()
+            return Form({GamePosition(p.y, -p.x) for p in self.form.position_set})
         else:
             raise ValueError("Angle must be 0, 90, 180, or 270")
 
     def mirror_piece(self, axis: str) -> "Piece":
         if axis == "x":
-            return Piece(self.color, Form({GamePosition(p.x, -p.y) for p in self.form.position_set}).normalize_to_form())
+            return Piece(self.color, Form({GamePosition(p.x, -p.y) for p in self.form.position_set}))
         elif axis == "y":
-            return Piece(self.color, Form({GamePosition(-p.x, p.y) for p in self.form.position_set}).normalize_to_form())
+            return Piece(self.color, Form({GamePosition(-p.x, p.y) for p in self.form.position_set}))
         else:
             raise ValueError("Axis must be 'horizontal' or 'vertical'")
 
