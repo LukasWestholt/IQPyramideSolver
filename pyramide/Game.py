@@ -57,10 +57,10 @@ class Game:
             if parallel:
                 prepared_tasks = tuple(tasks)
                 with ProcessPoolExecutor() as executor:
-                    iterator = tqdm(executor.map(self.process_position, prepared_tasks), total=len(prepared_tasks), desc=piece.color.value)
+                    solved_tasks = tuple(tqdm(executor.map(self.process_position, prepared_tasks), total=len(prepared_tasks), desc=piece.color.value, unit="positions"))
             else:
-                iterator = map(self.process_position, tasks)
-            for solvedGameSet in iterator:
+                solved_tasks = map(self.process_position, tasks)
+            for solvedGameSet in solved_tasks:
                 for solvedGame in solvedGameSet:
                     yield solvedGame
             return
