@@ -126,12 +126,12 @@ class TestPiece(unittest.TestCase):
     def test_mirror_x(self):
         mirrored = self.piece.mirror_piece("x")
         expected = Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(1, -1)}).normalize_to_form()
-        self.assertEqual(mirrored.position_set, expected.position_set)
+        self.assertEqual(mirrored.form.position_set, expected.position_set)
 
     def test_mirror_y(self):
         mirrored = self.piece.mirror_piece("y")
         expected = Form({GamePosition(0, 0), GamePosition(-1, 0), GamePosition(-1, 1)}).normalize_to_form()
-        self.assertEqual(mirrored.position_set, expected.position_set)
+        self.assertEqual(mirrored.form.position_set, expected.position_set)
 
     def test_invalid_mirror_axis(self):
         with self.assertRaises(ValueError):

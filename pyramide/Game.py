@@ -2,7 +2,6 @@ from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor
 
 from pyramide.GameBoard import GameBoard
-from pyramide.GameBoardGUI import GameBoardGUI
 from pyramide.GamePosition import GamePosition
 from pyramide.Piece import Piece
 

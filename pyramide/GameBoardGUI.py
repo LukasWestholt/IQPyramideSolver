@@ -21,7 +21,7 @@ class GameBoardGUI(tk.Tk):
             y1 = pos.y * self.cell_size
             x2 = x1 + self.cell_size
             y2 = y1 + self.cell_size
-            self.canvas.create_rectangle(x1, y1, x2, y2, fill="lightblue", outline="black")
+            self.canvas.create_rectangle(x1, y1, x2, y2, fill="black", outline="black")
 
     def draw_rounded_polygon(self, points, radius=20, **kwargs):
         def get_angle(p1, p2):
