@@ -4,6 +4,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
 from tkinter import font
+import math
 
 
 class Color(Enum):
@@ -29,12 +30,15 @@ class GamePosition:
         return hash((self.x, self.y))
 
 class Form:
-    def __init__(self, position_set: set[GamePosition]):
+    def __init__(self, position_set: set[GamePosition] | frozenset[GamePosition]):
         self.position_set = frozenset(position_set)
-        # self.assert_all_positions_connected()
+        # self.assert_all_positions_connected() # TODO
 
     def __len__(self):
         return len(self.position_set)
+
+    def __hash__(self):
+        return hash((self.position_set,))
 
     def __eq__(self, other):
         if isinstance(other, Form):
@@ -89,7 +93,12 @@ class Form:
         assert len(visited) == len(self.position_set), f"{self.position_set} has a Problem: {self.position_set.symmetric_difference(visited)}"
         return None
 
-    def delete_from_board(self, board: set[GamePosition]) -> Iterator[set[GamePosition]]:
+    def normalize(self) -> "Form":
+        min_x = min(p.x for p in self.position_set)
+        min_y = min(p.y for p in self.position_set)
+        return Form({GamePosition(p.x - min_x, p.y - min_y) for p in self.position_set})
+
+    def delete_from_board(self, board: frozenset[GamePosition]) -> Iterator[tuple[frozenset[GamePosition], frozenset[GamePosition]]]:
         for anchor in board:
             # Berechne die relative Verschiebung
             dx = anchor.x - min(pos.x for pos in self.position_set)
@@ -103,9 +112,23 @@ class Form:
 
             # Prüfe, ob alle verschobenen Positionen auf dem Spielbrett liegen
             if translated_positions.issubset(board):
-                yield board.difference(translated_positions)
+                yield board.difference(translated_positions), frozenset(translated_positions)
+            else:
+                # Berechne die relative Verschiebung
+                dx = anchor.x - max(pos.x for pos in self.position_set)
+                dy = anchor.y - max(pos.y for pos in self.position_set)
 
-    def fits_on_board(self, board: set[GamePosition]) -> bool:
+                # Verschiebe alle Positionen des Pieces
+                translated_positions = {
+                    GamePosition(pos.x + dx, pos.y + dy)
+                    for pos in self.position_set
+                }
+
+                # Prüfe, ob alle verschobenen Positionen auf dem Spielbrett liegen
+                if translated_positions.issubset(board):
+                    yield board.difference(translated_positions), frozenset(translated_positions)
+
+    def fits_on_board(self, board: frozenset[GamePosition]) -> bool:
         try:
             next(self.delete_from_board(board))
             return True  # Das Piece passt
@@ -121,100 +144,192 @@ class Piece:
 
         assert len(self.form) == self.size, f"Das Piece mit der Farbe {self.color} ist falsch"
 
+    def __copy__(self):
+        return Piece(self.size, self.color, Form(self.form.position_set))
+
+    def __hash__(self):
+        return hash((self.size, self.color, self.form))
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} with {(self.size, self.color)}>"
+
     def rotate_piece(self, angle: int) -> Form:
         if angle == 0:
             return self.form
         elif angle == 90:
-            return Form({GamePosition(-p.y, p.x) for p in self.form.position_set})
+            return Form({GamePosition(-p.y, p.x) for p in self.form.position_set}).normalize()
         elif angle == 180:
-            return Form({GamePosition(-p.x, -p.y) for p in self.form.position_set})
+            return Form({GamePosition(-p.x, -p.y) for p in self.form.position_set}).normalize()
         elif angle == 270:
-            return Form({GamePosition(p.y, -p.x) for p in self.form.position_set})
+            return Form({GamePosition(p.y, -p.x) for p in self.form.position_set}).normalize()
         else:
             raise ValueError("Angle must be 0, 90, 180, or 270")
 
-    def delete_from_board(self, board: set[GamePosition]) -> Iterator[set[GamePosition]]:
+    def delete_from_board(self, board: frozenset[GamePosition]) -> Iterator[tuple[frozenset[GamePosition], frozenset[GamePosition]]]:
         for angle in [0, 90, 180, 270]:
-            for new_board in self.rotate_piece(angle).delete_from_board(board):
-                yield new_board
+            for new_board, placed_piece_position in self.rotate_piece(angle).delete_from_board(board):
+                yield new_board, placed_piece_position
 
-    def fits_on_board(self, board: set[GamePosition]) -> bool:
+    def fits_on_board(self, board: frozenset[GamePosition]) -> bool:
         try:
             next(self.delete_from_board(board))
             return True
         except StopIteration:
             return False
 
-forms = [
-    Piece(5, Color.green, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(1, 1), GamePosition(2, 1), GamePosition(3, 1)})),
-    Piece(4, Color.violet, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(2, 0), GamePosition(3, 0)})),
-    Piece(5, Color.white, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(2, 0), GamePosition(3, 0), GamePosition(1, 1)})),
-    Piece(5, Color.yellow, Form({GamePosition(0, 0), GamePosition(0, 1), GamePosition(1, 1), GamePosition(2, 1), GamePosition(2, 0)})),
-    Piece(4, Color.brightGreen, Form({GamePosition(0, 0), GamePosition(0, 1), GamePosition(1, 0), GamePosition(1, 1)})),
-    Piece(5, Color.red, Form({GamePosition(0, 0), GamePosition(0, 1), GamePosition(1, 0), GamePosition(1, 1), GamePosition(1, 2)})),
-    Piece(5, Color.blue, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(2, 0), GamePosition(3, 0), GamePosition(0, 1)})),
-    Piece(5, Color.grey, Form({GamePosition(1, 0), GamePosition(0, 1), GamePosition(1, 1), GamePosition(2, 1), GamePosition(1, 2)})), # Star,
-    Piece(5, Color.pink, Form({GamePosition(2, 0), GamePosition(2, 1), GamePosition(1, 1), GamePosition(0, 2), GamePosition(1, 2)})),
-    Piece(5, Color.brightBlue, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(2, 0), GamePosition(2, 1), GamePosition(2, 2)})),
-    Piece(3, Color.white, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(0, 1)})),
-    Piece(4, Color.orange, Form({GamePosition(0, 0), GamePosition(0, 1), GamePosition(1, 1), GamePosition(2, 1)})),
-]
-assert len(forms) == 12, f"Es sind keine 12 Steine: {len(forms)}"
-assert sum([f.size for f in forms]) == 55, "Die Steine haben 55 Kugeln"
+class Game:
+    def __init__(self, pieces: list[Piece], board: frozenset[GamePosition], state: dict[Piece, frozenset[GamePosition]]) -> None:
+        self.pieces = pieces
+        self.board = board
+        self.state = state
 
-gameboard = set()
-rows = 9
-columns = 9
-for x in range(columns):
-    for y in range(rows):
-        if (x, y) in [
-            (0, 0),
-            (1, 0),
-            (2, 0),
-            (0, 1),
-            (0, 2),
-            (1, 1),
-            (5, 2),
+    def get_new_state(self, change: dict[Piece, frozenset[GamePosition]]) -> dict[Piece, frozenset[GamePosition]]:
+        return {**change, **self.state}
 
-            (0, 5),
-            (1, 5),
-            (0, 6),
-            (1, 6),
-            (2, 6),
-            (8, 6),
-            (0, 7),
-            (1, 7),
-            (2, 7),
-            (3, 7),
-            (7, 7),
-            (8, 7),
+    def has_already_position(self, piece: Piece) -> bool:
+        return piece in self.state
 
-            (0, 8),
-            (1, 8),
-            (2, 8),
-            (3, 8),
-            (6, 8),
-            (7, 8),
-            (8, 8),
-        ]:
-            continue
-        gameboard.add(GamePosition(x, y))
+    def is_valid_state(self) -> bool:
+        return bool(all([piece in self.state for piece in self.pieces]))
 
-assert len(gameboard) == 55, "Das Spielfeld hat 55 Plätze"
+    def sort_pieces(self) -> None:
+        self.pieces = sorted(self.pieces, key=lambda piece: piece.size, reverse=True)
 
-valid_gameboards = set()
+    def get_valid_gameboards(self) -> frozenset[frozenset[tuple[Piece, frozenset[GamePosition]]]]:
+        output: set[frozenset[tuple[Piece, frozenset[GamePosition]]]] = set()
+        for piece in self.pieces:
+            if self.has_already_position(piece):
+                continue
+            for possible_new_positions, placed_piece_position in piece.delete_from_board(self.board):
+                output.update(Game(self.pieces, possible_new_positions, self.get_new_state({piece: placed_piece_position})).get_valid_gameboards())
+            return frozenset(output)
+        assert self.is_valid_state(), self.state
+        output.add(frozenset(self.state.items()))
+        app = GameBoardGUI()
+        app.draw_board(self.board)
+        app.draw_figure(frozenset(self.state.items()))
+        app.mainloop()
+        return frozenset(output)
 
-for x in forms:
-    print(x.fits_on_board(gameboard))
+class GameBoardGUI(tk.Tk):
+    def __init__(self, cell_size=40):
+        super().__init__()
+        self.title("Game")
+        self.cell_size = cell_size
+
+        self.canvas = tk.Canvas(self, width=400, height=400, bg="white")
+        self.canvas.pack()
+
+    def draw_board(self, board: set[GamePosition] | frozenset[GamePosition]):
+        for pos in board:
+            x1 = pos.x * self.cell_size
+            y1 = pos.y * self.cell_size
+            x2 = x1 + self.cell_size
+            y2 = y1 + self.cell_size
+            self.canvas.create_rectangle(x1, y1, x2, y2, fill="lightblue", outline="black")
+
+    def draw_rounded_polygon(self, points, radius=20, **kwargs):
+        def get_angle(p1, p2):
+            return math.atan2(p2[1] - p1[1], p2[0] - p1[0])
+
+        new_points = []
+        for i in range(len(points)):
+            p1 = points[i - 1]
+            p2 = points[i]
+            p3 = points[(i + 1) % len(points)]
+
+            angle1 = get_angle(p2, p1)
+            angle2 = get_angle(p2, p3)
+
+            p1_offset = (p2[0] + radius * math.cos(angle1), p2[1] + radius * math.sin(angle1))
+            p2_offset = (p2[0] + radius * math.cos(angle2), p2[1] + radius * math.sin(angle2))
+
+            new_points.append(p1_offset)
+            # Add arc here if needed
+            new_points.append(p2_offset)
+
+        self.canvas.create_line(new_points, smooth=True, **kwargs)
+
+    def draw_figure(self, figure: frozenset[tuple[Piece, frozenset[GamePosition]]]):
+        for piece, positions in figure:
+            for pos in positions:
+                x1 = pos.x * self.cell_size
+                y1 = pos.y * self.cell_size
+                x2 = x1 + self.cell_size
+                y2 = y1 + self.cell_size
+                self.canvas.create_rectangle(x1, y1, x2, y2, fill=piece.color.value, outline="black")
+            # self.draw_rounded_polygon([(p.x, p.y) for p in positions], radius=1, fill='', width=1)
+
+if __name__ == "__main__":
+    pieces = [
+        Piece(5, Color.green, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(1, 1), GamePosition(2, 1), GamePosition(3, 1)})),
+        Piece(4, Color.violet, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(2, 0), GamePosition(3, 0)})),
+        Piece(5, Color.white, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(2, 0), GamePosition(3, 0), GamePosition(1, 1)})),
+        Piece(5, Color.yellow, Form({GamePosition(0, 0), GamePosition(0, 1), GamePosition(1, 1), GamePosition(2, 1), GamePosition(2, 0)})),
+        Piece(4, Color.brightGreen, Form({GamePosition(0, 0), GamePosition(0, 1), GamePosition(1, 0), GamePosition(1, 1)})),
+        Piece(5, Color.red, Form({GamePosition(0, 0), GamePosition(0, 1), GamePosition(1, 0), GamePosition(1, 1), GamePosition(1, 2)})),
+        Piece(5, Color.blue, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(2, 0), GamePosition(3, 0), GamePosition(0, 1)})),
+        Piece(5, Color.grey, Form({GamePosition(1, 0), GamePosition(0, 1), GamePosition(1, 1), GamePosition(2, 1), GamePosition(1, 2)})), # Star,
+        Piece(5, Color.pink, Form({GamePosition(2, 0), GamePosition(2, 1), GamePosition(1, 1), GamePosition(0, 2), GamePosition(1, 2)})),
+        Piece(5, Color.brightBlue, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(2, 0), GamePosition(2, 1), GamePosition(2, 2)})),
+        Piece(3, Color.white, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(0, 1)})),
+        Piece(4, Color.orange, Form({GamePosition(0, 0), GamePosition(0, 1), GamePosition(1, 1), GamePosition(2, 1)})),
+    ]
+
+    gameboard = set()
+    rows = 9
+    columns = 9
+    for x in range(columns):
+        for y in range(rows):
+            if (x, y) in [
+                (0, 0),
+                (1, 0),
+                (2, 0),
+                (0, 1),
+                (0, 2),
+                (1, 1),
+                (5, 2),
+
+                (0, 5),
+                (1, 5),
+                (0, 6),
+                (1, 6),
+                (2, 6),
+                (8, 6),
+                (0, 7),
+                (1, 7),
+                (2, 7),
+                (3, 7),
+                (7, 7),
+                (8, 7),
+
+                (0, 8),
+                (1, 8),
+                (2, 8),
+                (3, 8),
+                (6, 8),
+                (7, 8),
+                (8, 8),
+            ]:
+                continue
+            gameboard.add(GamePosition(x, y))
+
+    # assert len(pieces) == 12, f"Es sind keine 12 Steine: {len(pieces)}"
+    # assert sum([f.size for f in pieces]) == 55, "Die Steine haben 55 Kugeln"
+    assert len(gameboard) == 55, "Das Spielfeld hat 55 Plätze"
+    game = Game(pieces, frozenset(gameboard), {})
+    game.sort_pieces()
+    valid_gameboards = game.get_valid_gameboards()
+    print(valid_gameboards)
+    print(len(valid_gameboards))
+
+    # for valid_gameboard in valid_gameboards:
+    #     app = GameBoardGUI()
+    #     app.draw_board(gameboard)
+    #     app.draw_figure(valid_gameboard)
+    #     app.mainloop()
 
 
-# class GameBoard(tk.Tk):
-#     def __init__(self):
-#         super().__init__()
-#         self.title("Game")
-#         self._cells = {}
-#         self._create_board_display()
-#         self._create_board_grid()
 #
 #     def _create_board_display(self):
 #         display_frame = tk.Frame(master=self)
