@@ -105,37 +105,37 @@ class TestPiece(unittest.TestCase):
         self.assertIsNot(copy_piece, self.piece)
 
     def test_rotation_90(self):
-        rotated = self.piece.rotate_piece(90)
+        rotated = self.piece.rotate(90)
         expected = Form({GamePosition(0, 0), GamePosition(0, 1), GamePosition(-1, 1)})
-        self.assertEqual(rotated.position_set, expected.position_set)
+        self.assertEqual(rotated.form.position_set, expected.position_set)
 
     def test_rotation_180(self):
-        rotated = self.piece.rotate_piece(180)
+        rotated = self.piece.rotate(180)
         expected = Form({GamePosition(0, 0), GamePosition(-1, 0), GamePosition(-1, -1)})
-        self.assertEqual(rotated.position_set, expected.position_set)
+        self.assertEqual(rotated.form.position_set, expected.position_set)
 
     def test_rotation_270(self):
-        rotated = self.piece.rotate_piece(270)
+        rotated = self.piece.rotate(270)
         expected = Form({GamePosition(0, 0), GamePosition(0, -1), GamePosition(1, -1)})
-        self.assertEqual(rotated.position_set, expected.position_set)
+        self.assertEqual(rotated.form.position_set, expected.position_set)
 
     def test_invalid_rotation(self):
         with self.assertRaises(ValueError):
-            self.piece.rotate_piece(45)
+            self.piece.rotate(45)
 
     def test_mirror_x(self):
-        mirrored = self.piece.mirror_piece("x")
+        mirrored = self.piece.mirror("x")
         expected = Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(1, -1)})
         self.assertEqual(mirrored.form.position_set, expected.position_set)
 
     def test_mirror_y(self):
-        mirrored = self.piece.mirror_piece("y")
+        mirrored = self.piece.mirror("y")
         expected = Form({GamePosition(0, 0), GamePosition(-1, 0), GamePosition(-1, 1)})
         self.assertEqual(mirrored.form.position_set, expected.position_set)
 
     def test_invalid_mirror_axis(self):
         with self.assertRaises(ValueError):
-            self.piece.mirror_piece("z")
+            self.piece.mirror("z")
 
     def test_fits_on_board_true(self):
         board = GameBoard({

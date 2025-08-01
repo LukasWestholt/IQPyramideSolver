@@ -28,19 +28,40 @@ class Piece:
     def __len__(self):
         return len(self.form)
 
-    def rotate_piece(self, angle: int) -> Form:
+    def rotate(self, angle: int) -> "Piece":
+        """
+        Rotates the piece by the specified angle in degrees.
+        Supported angles are 0, 90, 180, and 270. Rotation is performed clockwise around the origin.
+
+        0°: Returns the original form.
+        90°: Rotates the piece 90 degrees clockwise.
+        180°: Rotates the piece 180 degrees.
+        270°: Rotates the piece 270 degrees clockwise.
+
+        :raises ValueError: if the angle is not one of the supported values.
+        """
         if angle == 0:
-            return self.form
+            return self
         elif angle == 90:
-            return Form({GamePosition(-p.y, p.x) for p in self.form.position_set})
+            return Piece(self.color, Form({GamePosition(-p.y, p.x) for p in self.form.position_set}))
         elif angle == 180:
-            return Form({GamePosition(-p.x, -p.y) for p in self.form.position_set})
+            return Piece(self.color, Form({GamePosition(-p.x, -p.y) for p in self.form.position_set}))
         elif angle == 270:
-            return Form({GamePosition(p.y, -p.x) for p in self.form.position_set})
+            return Piece(self.color, Form({GamePosition(p.y, -p.x) for p in self.form.position_set}))
         else:
             raise ValueError("Angle must be 0, 90, 180, or 270")
 
-    def mirror_piece(self, axis: str) -> "Piece":
+    def mirror(self, axis: str) -> "Piece":
+        """
+        Mirrors the piece along the specified axis.
+
+        Supported axes are "x" (horizontal) and "y" (vertical).
+
+        "x": Mirrors the piece across the horizontal axis (flips vertically).
+        "y": Mirrors the piece across the vertical axis (flips horizontally).
+
+        :raises ValueError: if the axis is not "x" or "y".
+        """
         if axis == "x":
             return Piece(self.color, Form({GamePosition(p.x, -p.y) for p in self.form.position_set}))
         elif axis == "y":
@@ -48,13 +69,19 @@ class Piece:
         else:
             raise ValueError("Axis must be 'horizontal' or 'vertical'")
 
-    def delete_from_board(self, board: GameBoard) -> Iterator[tuple[GameBoard, frozenset[GamePosition]]]:
+    def all_transformations(self) -> set[Form]:
+        transformations = set()
         for angle in [0, 90, 180, 270]:
-            for new_board, placed_piece_position in self.rotate_piece(angle).delete_from_board(board):
+            rotated = self.rotate(angle)
+            transformations.add(rotated.form)
+            transformations.add(rotated.mirror("x").form)
+            transformations.add(rotated.mirror("y").form)
+        return transformations
+
+    def delete_from_board(self, board: GameBoard) -> Iterator[tuple[GameBoard, frozenset[GamePosition]]]:
+        for transformation in self.all_transformations():
+            for new_board, placed_piece_position in transformation.delete_from_board(board):
                 yield new_board, placed_piece_position
-            for mirror in ["x", "y"]:
-                for new_board, placed_piece_position in self.mirror_piece(mirror).rotate_piece(angle).delete_from_board(board):
-                    yield new_board, placed_piece_position
 
     def fits_on_board(self, board: GameBoard) -> bool:
         try:
