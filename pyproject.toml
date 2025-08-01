@@ -1,0 +1,88 @@
+[project]
+name = "pyramide"
+description = "Solver for the game."
+readme = "README.md"
+version = "1.0.0"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [
+    { name = "Lukas Westholt", email = "support@lukaswestholt.de" },
+]
+
+dependencies = [
+    "tqdm (>=4.67.1,<5.0.0)"
+]
+
+[tool.poetry]
+package-mode = false
+requires-poetry = ">=2.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.2.0"
+ruff = "^0.11.8"
+pyright = "^1.1.368"
+
+[tool.pyright]
+include = ["."]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "standard"
+
+[tool.ruff]
+extend-exclude = [".idea", ".vscode"]
+
+[tool.ruff.lint]
+pydocstyle.convention = "google"
+# enabled linter rules (the default ones are E4, E7, E9 and F)
+# docs: https://docs.astral.sh/ruff/linter/#rule-selection
+# rules: https://docs.astral.sh/ruff/rules/
+select = [
+    # pyflakes
+    "F",
+    # pycodestyle
+    "E4",  # imports
+    "E7",  # common misc style errors
+    "E9",  # errors
+    # mccabe (limits function complexity)
+    "C90",
+    # PEP8 naming
+    "N",
+    # pydocstyle
+    "D3",  # correct quotes
+    "D400", "D403", "D404",  # wording, more rules are enabled by using the Google docstyle convention
+    # pyupgrade (proper usage of newer language features)
+    "UP",
+    # flake8-annotations (use of type hints)
+    "ANN0",  # function arguments
+    "ANN2",  # return type
+    "ANN4",  # disallow any type
+    # flake8-bugbear (common sources of bugs)
+    "B",
+    # flake8-builtins (detect shadowing of builtins)
+    "A",
+    # flake8-comprehensions (proper use of python list/dict/… comprehensions)
+    "C",
+    # flake8-return
+    "RET",
+    # flake8-self
+    "SLF",
+    # flake8-unused-arguments
+    "ARG",
+    # pylint
+    "PL",
+    # ruff-specific
+    "RUF",
+    # flake8-simplify
+    # "SIM",
+    # A Linter for performance anti-patterns
+    "PERF",
+    # isort
+    "I",
+    # "T", Use this to migrate from print to logging
+    # flake8-quotes
+    "Q",
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
