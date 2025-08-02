@@ -21,8 +21,7 @@ def get_pieces():
     ]
     assert len(pieces) == 12, f"Es sind keine 12 Steine: {len(pieces)}"
     assert sum([len(f) for f in pieces]) == 55, f"Die Steine haben keine 55 Kugeln: {sum([len(f) for f in pieces])}"
-
-    return [piece.mirror_piece("x") for piece in pieces] # hotfix for (0,0) top left
+    return pieces
 
 def get_gameboard():
     gameboard_set = set()
