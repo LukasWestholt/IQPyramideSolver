@@ -5,6 +5,7 @@ from typing import Any
 @dataclass(frozen=True)
 class GamePosition:
     """(0, 0) is top left."""
+
     x: int
     y: int
 

@@ -43,11 +43,20 @@ class Piece:
         if angle == 0:
             return self
         elif angle == 90:
-            return Piece(self.color, Form({GamePosition(-p.y, p.x) for p in self.form.position_set}))
+            return Piece(
+                self.color,
+                Form({GamePosition(-p.y, p.x) for p in self.form.position_set}),
+            )
         elif angle == 180:
-            return Piece(self.color, Form({GamePosition(-p.x, -p.y) for p in self.form.position_set}))
+            return Piece(
+                self.color,
+                Form({GamePosition(-p.x, -p.y) for p in self.form.position_set}),
+            )
         elif angle == 270:
-            return Piece(self.color, Form({GamePosition(p.y, -p.x) for p in self.form.position_set}))
+            return Piece(
+                self.color,
+                Form({GamePosition(p.y, -p.x) for p in self.form.position_set}),
+            )
         else:
             raise ValueError("Angle must be 0, 90, 180, or 270")
 
@@ -63,9 +72,15 @@ class Piece:
         :raises ValueError: if the axis is not "x" or "y".
         """
         if axis == "x":
-            return Piece(self.color, Form({GamePosition(p.x, -p.y) for p in self.form.position_set}))
+            return Piece(
+                self.color,
+                Form({GamePosition(p.x, -p.y) for p in self.form.position_set}),
+            )
         elif axis == "y":
-            return Piece(self.color, Form({GamePosition(-p.x, p.y) for p in self.form.position_set}))
+            return Piece(
+                self.color,
+                Form({GamePosition(-p.x, p.y) for p in self.form.position_set}),
+            )
         else:
             raise ValueError("Axis must be 'horizontal' or 'vertical'")
 
@@ -78,9 +93,13 @@ class Piece:
             transformations.add(rotated.mirror("y").form)
         return transformations
 
-    def delete_from_board(self, board: GameBoard) -> Iterator[tuple[GameBoard, frozenset[GamePosition]]]:
+    def delete_from_board(
+        self, board: GameBoard
+    ) -> Iterator[tuple[GameBoard, frozenset[GamePosition]]]:
         for transformation in self.all_transformations():
-            for new_board, placed_piece_position in transformation.delete_from_board(board):
+            for new_board, placed_piece_position in transformation.delete_from_board(
+                board
+            ):
                 yield new_board, placed_piece_position
 
     def fits_on_board(self, board: GameBoard) -> bool:

@@ -9,11 +9,9 @@ from pyramide.Piece import Piece
 
 class TestPieceFitsOnBoard(unittest.TestCase):
     def setUp(self):
-        self.board = GameBoard({
-            GamePosition(x, y)
-            for x in range(3)
-            for y in range(3)
-        })  # 3x3 grid
+        self.board = GameBoard(
+            {GamePosition(x, y) for x in range(3) for y in range(3)}
+        )  # 3x3 grid
 
     def test_piece_fits1(self):
         form = Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(1, 1)})
@@ -23,24 +21,42 @@ class TestPieceFitsOnBoard(unittest.TestCase):
     def test_piece_fits2(self):
         form = Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(1, 1)})
         piece = Piece(Color.green, form)
-        board = GameBoard({
-            GamePosition(1, 2),
-            GamePosition(2, 1),
-            GamePosition(0, 0),
-            GamePosition(2, 0),
-            GamePosition(0, 2),
-            GamePosition(2, 2)
-        })
+        board = GameBoard(
+            {
+                GamePosition(1, 2),
+                GamePosition(2, 1),
+                GamePosition(0, 0),
+                GamePosition(2, 0),
+                GamePosition(0, 2),
+                GamePosition(2, 2),
+            }
+        )
         self.assertTrue(piece.fits_on_board(board))
 
     def test_piece_fits3(self):
         form = Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(1, 1)})
         piece = Piece(Color.green, form)
-        board = GameBoard({GamePosition(0, 1), GamePosition(0, 0), GamePosition(2, 0), GamePosition(0, 2), GamePosition(2, 2), GamePosition(1, 0)})
+        board = GameBoard(
+            {
+                GamePosition(0, 1),
+                GamePosition(0, 0),
+                GamePosition(2, 0),
+                GamePosition(0, 2),
+                GamePosition(2, 2),
+                GamePosition(1, 0),
+            }
+        )
         self.assertTrue(piece.fits_on_board(board))
 
     def test_piece_does_not_fit(self):
-        form = Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(2, 0), GamePosition(3, 0)})
+        form = Form(
+            {
+                GamePosition(0, 0),
+                GamePosition(1, 0),
+                GamePosition(2, 0),
+                GamePosition(3, 0),
+            }
+        )
         piece = Piece(Color.red, form)
         self.assertFalse(piece.fits_on_board(self.board))
 
@@ -64,11 +80,9 @@ class TestPieceFitsOnBoard(unittest.TestCase):
     def test_piece_unfits_multiple_times(self):
         form = Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(1, 1)})
         piece = Piece(Color.green, form)
-        board = GameBoard({
-            GamePosition(x, y)
-            for x in range(2)
-            for y in range(2)
-        })  # 2x2 grid
+        board = GameBoard(
+            {GamePosition(x, y) for x in range(2) for y in range(2)}
+        )  # 2x2 grid
         new_boards = set(piece.delete_from_board(board))
         self.assertEqual(4, len(new_boards))
         for new_board, _ in new_boards:
@@ -138,28 +152,35 @@ class TestPiece(unittest.TestCase):
             self.piece.mirror("z")
 
     def test_fits_on_board_true(self):
-        board = GameBoard({
-            GamePosition(2, 2),
-            GamePosition(3, 2),
-            GamePosition(3, 3),
-        })
+        board = GameBoard(
+            {
+                GamePosition(2, 2),
+                GamePosition(3, 2),
+                GamePosition(3, 3),
+            }
+        )
         self.assertTrue(self.piece.fits_on_board(board))
 
     def test_fits_on_board_false(self):
-        board = GameBoard({
-            GamePosition(0, 0),
-            GamePosition(2, 2),
-        })
+        board = GameBoard(
+            {
+                GamePosition(0, 0),
+                GamePosition(2, 2),
+            }
+        )
         self.assertFalse(self.piece.fits_on_board(board))
 
     def test_delete_from_board(self):
-        board = GameBoard({
-            GamePosition(2, 2),
-            GamePosition(3, 2),
-            GamePosition(3, 3),
-        })
+        board = GameBoard(
+            {
+                GamePosition(2, 2),
+                GamePosition(3, 2),
+                GamePosition(3, 3),
+            }
+        )
         results = list(self.piece.delete_from_board(board))
         self.assertTrue(any(isinstance(r, tuple) and len(r) == 2 for r in results))
+
 
 if __name__ == "__main__":
     unittest.main()

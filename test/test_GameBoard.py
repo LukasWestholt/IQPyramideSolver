@@ -5,13 +5,8 @@ from pyramide.GamePosition import GamePosition
 
 
 class TestGameBoard(unittest.TestCase):
-
     def setUp(self):
-        self.positions = {
-            GamePosition(0, 0),
-            GamePosition(1, 0),
-            GamePosition(1, 1)
-        }
+        self.positions = {GamePosition(0, 0), GamePosition(1, 0), GamePosition(1, 1)}
         self.board = GameBoard(self.positions)
 
     def test_initialization(self):
@@ -50,7 +45,7 @@ class TestGameBoard(unittest.TestCase):
         expected_positions = {
             GamePosition(0, 0),
             GamePosition(1, 0),
-            GamePosition(1, 1)
+            GamePosition(1, 1),
         }
         self.assertEqual(normalized.position_set, expected_positions)
 
@@ -60,6 +55,7 @@ class TestGameBoard(unittest.TestCase):
     def test_has_min_connected_gamepositions_false(self):
         board = GameBoard({GamePosition(0, 0), GamePosition(5, 5)})
         self.assertFalse(board.has_min_connected_gamepositions(2))
+
 
 if __name__ == "__main__":
     unittest.main()

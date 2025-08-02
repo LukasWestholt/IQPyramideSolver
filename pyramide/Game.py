@@ -12,15 +12,23 @@ from pyramide.SolvedGame import SolvedGame
 class NotValidProblemException(Exception):
     pass
 
+
 class Game:
-    def __init__(self, pieces: list[Piece], board: GameBoard, state: dict[Piece, frozenset[GamePosition]]) -> None:
+    def __init__(
+        self,
+        pieces: list[Piece],
+        board: GameBoard,
+        state: dict[Piece, frozenset[GamePosition]],
+    ) -> None:
         self.pieces = pieces
         self.board = board
         self.state = state
         if not self._is_valid_problem():
             raise NotValidProblemException()
 
-    def get_new_state(self, change: dict[Piece, frozenset[GamePosition]]) -> dict[Piece, frozenset[GamePosition]]:
+    def get_new_state(
+        self, change: dict[Piece, frozenset[GamePosition]]
+    ) -> dict[Piece, frozenset[GamePosition]]:
         return {**change, **self.state}
 
     def has_already_position(self, piece: Piece) -> bool:
@@ -40,7 +48,11 @@ class Game:
     def process_position(self, args) -> frozenset[SolvedGame]:
         piece, possible_new_position, placed_piece_position = args
         try:
-            new_game = Game(self.pieces, possible_new_position, self.get_new_state({piece: placed_piece_position}))
+            new_game = Game(
+                self.pieces,
+                possible_new_position,
+                self.get_new_state({piece: placed_piece_position}),
+            )
         except NotValidProblemException:
             return frozenset()
         return frozenset(new_game.solve())
@@ -52,12 +64,21 @@ class Game:
 
             tasks = (
                 (piece, possible_new_position, placed_piece_position)
-                for possible_new_position, placed_piece_position in piece.delete_from_board(self.board)
+                for possible_new_position, placed_piece_position in piece.delete_from_board(
+                    self.board
+                )
             )
             if parallel:
                 prepared_tasks = tuple(tasks)
                 with ProcessPoolExecutor() as executor:
-                    solved_tasks = tuple(tqdm(executor.map(self.process_position, prepared_tasks), total=len(prepared_tasks), desc=piece.color.value, unit="positions"))
+                    solved_tasks = tuple(
+                        tqdm(
+                            executor.map(self.process_position, prepared_tasks),
+                            total=len(prepared_tasks),
+                            desc=piece.color.value,
+                            unit="positions",
+                        )
+                    )
             else:
                 solved_tasks = map(self.process_position, tasks)
             for solvedGameSet in solved_tasks:

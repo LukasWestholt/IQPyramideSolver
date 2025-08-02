@@ -35,8 +35,14 @@ class GameBoardGUI(tk.Tk):
             angle1 = get_angle(p2, p1)
             angle2 = get_angle(p2, p3)
 
-            p1_offset = (p2[0] + radius * math.cos(angle1), p2[1] + radius * math.sin(angle1))
-            p2_offset = (p2[0] + radius * math.cos(angle2), p2[1] + radius * math.sin(angle2))
+            p1_offset = (
+                p2[0] + radius * math.cos(angle1),
+                p2[1] + radius * math.sin(angle1),
+            )
+            p2_offset = (
+                p2[0] + radius * math.cos(angle2),
+                p2[1] + radius * math.sin(angle2),
+            )
 
             new_points.append(p1_offset)
             # Add arc here if needed
@@ -51,8 +57,11 @@ class GameBoardGUI(tk.Tk):
                 y1 = pos.y * self.cell_size
                 x2 = x1 + self.cell_size
                 y2 = y1 + self.cell_size
-                self.canvas.create_rectangle(x1, y1, x2, y2, fill=piece.color.value, outline="black")
+                self.canvas.create_rectangle(
+                    x1, y1, x2, y2, fill=piece.color.value, outline="black"
+                )
             # self.draw_rounded_polygon([(p.x, p.y) for p in positions], radius=1, fill='', width=1)
+
 
 #
 #     def _create_board_display(self):

@@ -52,7 +52,6 @@ class GameBoard:
                 neighbors.add(neighbor)
         return neighbors
 
-
     def assert_all_positions_connected(self):
         if not self.position_set:
             return None
@@ -69,13 +68,17 @@ class GameBoard:
                 if neighbor not in visited:
                     queue.append(neighbor)
 
-        assert len(visited) == len(self.position_set), f"{self.position_set} has a Problem: {self.position_set.symmetric_difference(visited)}"
+        assert len(visited) == len(self.position_set), (
+            f"{self.position_set} has a Problem: {self.position_set.symmetric_difference(visited)}"
+        )
         return None
 
     def normalize_to_gameboard(self) -> "GameBoard":
         min_x = min(p.x for p in self.position_set)
         min_y = min(p.y for p in self.position_set)
-        return GameBoard({GamePosition(p.x - min_x, p.y - min_y) for p in self.position_set})
+        return GameBoard(
+            {GamePosition(p.x - min_x, p.y - min_y) for p in self.position_set}
+        )
 
     def has_min_connected_gamepositions(self, min_connected_gamepositions: int) -> bool:
         visited = set()
@@ -95,7 +98,7 @@ class GameBoard:
                 component.add(current)
 
                 for neighbor in self.get_neighbors(current):
-                 if neighbor not in component:
+                    if neighbor not in component:
                         queue.append(neighbor)
 
             # Mark all positions in this component as visited
