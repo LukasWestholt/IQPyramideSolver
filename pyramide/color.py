@@ -13,3 +13,4 @@ class Color(Enum):
     blue = "blue"
     pink = "pink"
     bright_blue = "royalblue"
+    creme_white = "thistle1"

@@ -31,7 +31,7 @@ def get_pieces() -> list[Piece]:
             ),
         ),
         Piece(
-            Color.white,
+            Color.creme_white,
             Form(
                 {
                     GamePosition(0, 0),
