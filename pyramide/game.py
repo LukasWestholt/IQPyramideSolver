@@ -3,13 +3,13 @@ from concurrent.futures import ProcessPoolExecutor
 
 from tqdm import tqdm
 
-from pyramide.GameBoard import GameBoard
-from pyramide.GamePosition import GamePosition
-from pyramide.Piece import Piece
-from pyramide.SolvedGame import SolvedGame
+from pyramide.game_board import GameBoard
+from pyramide.game_position import GamePosition
+from pyramide.piece import Piece
+from pyramide.solved_game import SolvedGame
 
 
-class NotValidProblemException(Exception):
+class NotValidProblemError(Exception):
     pass
 
 
@@ -24,7 +24,7 @@ class Game:
         self.board = board
         self.state = state
         if not self._is_valid_problem():
-            raise NotValidProblemException()
+            raise NotValidProblemError()
 
     def get_new_state(
         self, change: dict[Piece, frozenset[GamePosition]]
@@ -35,17 +35,19 @@ class Game:
         return piece in self.state
 
     def is_valid_state(self) -> bool:
-        return bool(all([piece in self.state for piece in self.pieces]))
+        return bool(all(piece in self.state for piece in self.pieces))
 
     def _is_valid_problem(self) -> bool:
         """Heuristic for isolated spaces."""
-        min_isolated_space = min((len(p) for p in self.pieces))
+        min_isolated_space = min(len(p) for p in self.pieces)
         return self.board.has_min_connected_gamepositions(min_isolated_space)
 
     def sort_pieces(self) -> None:
         self.pieces = sorted(self.pieces, key=lambda piece: len(piece), reverse=True)
 
-    def process_position(self, args) -> frozenset[SolvedGame]:
+    def process_position(
+        self, args: tuple[Piece, GameBoard, frozenset[GamePosition]]
+    ) -> frozenset[SolvedGame]:
         piece, possible_new_position, placed_piece_position = args
         try:
             new_game = Game(
@@ -53,11 +55,11 @@ class Game:
                 possible_new_position,
                 self.get_new_state({piece: placed_piece_position}),
             )
-        except NotValidProblemException:
+        except NotValidProblemError:
             return frozenset()
         return frozenset(new_game.solve())
 
-    def solve(self, parallel=False) -> Iterator[SolvedGame]:
+    def solve(self, parallel: bool = False) -> Iterator[SolvedGame]:
         for piece in self.pieces:
             if self.has_already_position(piece):
                 continue
@@ -81,9 +83,8 @@ class Game:
                     )
             else:
                 solved_tasks = map(self.process_position, tasks)
-            for solvedGameSet in solved_tasks:
-                for solvedGame in solvedGameSet:
-                    yield solvedGame
+            for solved_game_set in solved_tasks:
+                yield from solved_game_set
             return
 
         assert self.is_valid_state(), self.state

@@ -1,11 +1,13 @@
 from collections.abc import Iterator
 
-from pyramide.GameBoard import GameBoard
-from pyramide.GamePosition import GamePosition
+from pyramide.game_board import GameBoard
+from pyramide.game_position import GamePosition
 
 
 class Form(GameBoard):
-    def __init__(self, position_set: set[GamePosition] | frozenset[GamePosition]):
+    def __init__(
+        self, position_set: set[GamePosition] | frozenset[GamePosition]
+    ) -> None:
         normalized_position_set = (
             GameBoard(position_set).normalize_to_gameboard().position_set
         )

@@ -1,11 +1,11 @@
-from pyramide.Color import Color
-from pyramide.Form import Form
-from pyramide.GameBoard import GameBoard
-from pyramide.GamePosition import GamePosition
-from pyramide.Piece import Piece
+from pyramide.color import Color
+from pyramide.form import Form
+from pyramide.game_board import GameBoard
+from pyramide.game_position import GamePosition
+from pyramide.piece import Piece
 
 
-def get_pieces():
+def get_pieces() -> list[Piece]:
     pieces = [
         Piece(
             Color.green,
@@ -55,7 +55,7 @@ def get_pieces():
             ),
         ),
         Piece(
-            Color.brightGreen,
+            Color.bright_green,
             Form(
                 {
                     GamePosition(0, 0),
@@ -114,7 +114,7 @@ def get_pieces():
             ),
         ),
         Piece(
-            Color.brightBlue,
+            Color.bright_blue,
             Form(
                 {
                     GamePosition(0, 0),
@@ -148,7 +148,7 @@ def get_pieces():
     return pieces
 
 
-def get_gameboard():
+def get_gameboard() -> GameBoard:
     gameboard_set = set()
     rows = 9
     columns = 9

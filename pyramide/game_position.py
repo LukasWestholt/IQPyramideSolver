@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass(frozen=True)
@@ -9,15 +8,15 @@ class GamePosition:
     x: int
     y: int
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.x, self.y))
 
-    def __sub__(self, other: Any) -> "GamePosition":
+    def __sub__(self, other: object) -> "GamePosition":
         if not isinstance(other, GamePosition):
             raise TypeError()
         return GamePosition(self.x - other.x, self.y - other.y)
 
-    def __add__(self, other: Any) -> "GamePosition":
+    def __add__(self, other: object) -> "GamePosition":
         if not isinstance(other, GamePosition):
             raise TypeError()
         return GamePosition(self.x + other.x, self.y + other.y)

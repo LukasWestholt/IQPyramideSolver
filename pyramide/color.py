@@ -4,7 +4,7 @@ from enum import Enum
 class Color(Enum):
     violet = "darkviolet"
     white = "white"
-    brightGreen = "springgreen"
+    bright_green = "springgreen"
     green = "forestgreen"
     red = "red"
     orange = "orange"
@@ -12,4 +12,4 @@ class Color(Enum):
     yellow = "yellow"
     blue = "blue"
     pink = "pink"
-    brightBlue = "royalblue"
+    bright_blue = "royalblue"

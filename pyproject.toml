@@ -82,6 +82,7 @@ select = [
     # flake8-quotes
     "Q",
 ]
+ignore = ["PLR2004"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

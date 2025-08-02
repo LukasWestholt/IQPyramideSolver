@@ -1,10 +1,10 @@
-from pyramide.Color import Color
-from pyramide.Form import Form
-from pyramide.Game import Game
-from pyramide.GameBoard import GameBoard
-from pyramide.GameBoardGUI import GameBoardGUI
-from pyramide.GamePosition import GamePosition
-from pyramide.Piece import Piece
+from pyramide.color import Color
+from pyramide.form import Form
+from pyramide.game import Game
+from pyramide.game_board import GameBoard
+from pyramide.game_board_gui import GameBoardGUI
+from pyramide.game_position import GamePosition
+from pyramide.piece import Piece
 from scripts.iq_pyramide_helpers import get_gameboard, get_pieces
 
 if __name__ == "__main__":
@@ -42,9 +42,9 @@ if __name__ == "__main__":
         )
     }
     assert len(new) == (len(gameboard) - 7)
-    gameboardNew = GameBoard(new)
+    gameboard_new = GameBoard(new)
 
-    game = Game(pieces, gameboardNew, {})
+    game = Game(pieces, gameboard_new, {})
     game.sort_pieces()
     valid_gameboards = game.solve(parallel=True)
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         if valid_gameboard not in unique_valid_gameboards:
             print(valid_gameboard)
             app = GameBoardGUI()
-            app.draw_board(gameboardNew)
+            app.draw_board(gameboard_new)
             app.draw_figure(valid_gameboard)
             app.mainloop()
             unique_valid_gameboards.add(valid_gameboard)

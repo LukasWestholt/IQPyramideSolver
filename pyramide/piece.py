@@ -1,31 +1,31 @@
 from collections.abc import Iterator
 
-from pyramide.Color import Color
-from pyramide.Form import Form
-from pyramide.GameBoard import GameBoard
-from pyramide.GamePosition import GamePosition
+from pyramide.color import Color
+from pyramide.form import Form
+from pyramide.game_board import GameBoard
+from pyramide.game_position import GamePosition
 
 
 class Piece:
-    def __init__(self, color: Color, form: Form):
+    def __init__(self, color: Color, form: Form) -> None:
         self.color = color
         self.form = form
 
-    def __copy__(self):
+    def __copy__(self) -> "Piece":
         return Piece(self.color, Form(self.form.position_set))
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.color, self.form))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} with {(len(self), self.color)}>"
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Piece):
             return (self.color, self.form) == (other.color, other.form)
         return False
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.form)
 
     def rotate(self, angle: int) -> "Piece":
@@ -42,23 +42,22 @@ class Piece:
         """
         if angle == 0:
             return self
-        elif angle == 90:
+        if angle == 90:
             return Piece(
                 self.color,
                 Form({GamePosition(-p.y, p.x) for p in self.form.position_set}),
             )
-        elif angle == 180:
+        if angle == 180:
             return Piece(
                 self.color,
                 Form({GamePosition(-p.x, -p.y) for p in self.form.position_set}),
             )
-        elif angle == 270:
+        if angle == 270:
             return Piece(
                 self.color,
                 Form({GamePosition(p.y, -p.x) for p in self.form.position_set}),
             )
-        else:
-            raise ValueError("Angle must be 0, 90, 180, or 270")
+        raise ValueError("Angle must be 0, 90, 180, or 270")
 
     def mirror(self, axis: str) -> "Piece":
         """
@@ -76,13 +75,12 @@ class Piece:
                 self.color,
                 Form({GamePosition(p.x, -p.y) for p in self.form.position_set}),
             )
-        elif axis == "y":
+        if axis == "y":
             return Piece(
                 self.color,
                 Form({GamePosition(-p.x, p.y) for p in self.form.position_set}),
             )
-        else:
-            raise ValueError("Axis must be 'horizontal' or 'vertical'")
+        raise ValueError("Axis must be 'horizontal' or 'vertical'")
 
     def all_transformations(self) -> set[Form]:
         transformations = set()
@@ -97,10 +95,7 @@ class Piece:
         self, board: GameBoard
     ) -> Iterator[tuple[GameBoard, frozenset[GamePosition]]]:
         for transformation in self.all_transformations():
-            for new_board, placed_piece_position in transformation.delete_from_board(
-                board
-            ):
-                yield new_board, placed_piece_position
+            yield from transformation.delete_from_board(board)
 
     def fits_on_board(self, board: GameBoard) -> bool:
         try:

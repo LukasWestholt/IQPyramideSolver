@@ -1,27 +1,29 @@
 from collections import deque
 
-from pyramide.GamePosition import GamePosition
+from pyramide.game_position import GamePosition
 
 
 class GameBoard:
-    def __init__(self, position_set: set[GamePosition] | frozenset[GamePosition]):
+    def __init__(
+        self, position_set: set[GamePosition] | frozenset[GamePosition]
+    ) -> None:
         self.position_set = frozenset(position_set)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.position_set)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.position_set,))
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, GameBoard):
             return self.position_set == other.position_set
         return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} with {set(self.position_set)}>"
 
-    def __str__(self):
+    def __str__(self) -> str:
         if not self.position_set:
             return "<empty form>"
 
@@ -52,9 +54,9 @@ class GameBoard:
                 neighbors.add(neighbor)
         return neighbors
 
-    def assert_all_positions_connected(self):
+    def assert_all_positions_connected(self) -> None:
         if not self.position_set:
-            return None
+            return
 
         visited: set[GamePosition] = set()
         queue = deque([set(self.position_set).pop()])
@@ -71,7 +73,7 @@ class GameBoard:
         assert len(visited) == len(self.position_set), (
             f"{self.position_set} has a Problem: {self.position_set.symmetric_difference(visited)}"
         )
-        return None
+        return
 
     def normalize_to_gameboard(self) -> "GameBoard":
         min_x = min(p.x for p in self.position_set)
