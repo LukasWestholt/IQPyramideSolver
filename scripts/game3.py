@@ -12,17 +12,27 @@ if __name__ == "__main__":
     gameboard = get_gameboard()
 
     piece1 = Piece(
-        Color.white, Form({GamePosition(0, 0), GamePosition(1, 0), GamePosition(0, 1)})
-    )
-    pieces.remove(piece1)
-    piece2 = Piece(
-        Color.orange,
+        Color.red,
         Form(
             {
                 GamePosition(0, 0),
                 GamePosition(0, 1),
+                GamePosition(1, 0),
                 GamePosition(1, 1),
+                GamePosition(1, 2),
+            }
+        ),
+    )
+    pieces.remove(piece1)
+    piece2 = Piece(
+        Color.bright_blue,
+        Form(
+            {
+                GamePosition(0, 0),
+                GamePosition(1, 0),
+                GamePosition(2, 0),
                 GamePosition(2, 1),
+                GamePosition(2, 2),
             }
         ),
     )
@@ -34,14 +44,18 @@ if __name__ == "__main__":
         not in (
             GamePosition(x=8, y=0),
             GamePosition(x=8, y=1),
-            GamePosition(x=7, y=1),
             GamePosition(x=8, y=2),
             GamePosition(x=7, y=2),
             GamePosition(x=6, y=2),
+            # red
+            GamePosition(x=5, y=0),
+            GamePosition(x=6, y=0),
+            GamePosition(x=7, y=0),
             GamePosition(x=6, y=1),
+            GamePosition(x=7, y=1),
         )
     }
-    assert len(new) == (len(gameboard) - 7)
+    assert len(new) == (len(gameboard) - 10)
     gameboard_new = GameBoard(new)
 
     game = Game(pieces, gameboard_new, {})
@@ -60,4 +74,4 @@ if __name__ == "__main__":
             unique_valid_gameboards.add(valid_gameboard)
 
     print(len(unique_valid_gameboards))
-    assert len(unique_valid_gameboards) == 11, "Nicht alle Ergebnisse gefunden!!"
+    assert len(unique_valid_gameboards) == 26, "Nicht alle Ergebnisse gefunden!!"
